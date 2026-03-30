@@ -7,6 +7,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { AgentRegistry } from "./agents/types.js";
+import { createAgentRoutes } from "./routes/agent-routes.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -65,6 +66,8 @@ export function createApp(logger: pino.Logger, options: CreateAppOptions) {
       version,
     });
   });
+
+  app.use("/api", createAgentRoutes(options.agentRegistry));
 
   return app;
 }

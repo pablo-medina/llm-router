@@ -4,9 +4,19 @@
 
 export type ChatRole = "system" | "user" | "assistant";
 
+/** OpenAI-compatible multimodal parts (vision, etc.). */
+export type ChatContentPart =
+  | { type: "text"; text: string }
+  | {
+      type: "image_url";
+      image_url: { url: string; detail?: "low" | "high" | "auto" };
+    };
+
+export type ChatMessageContent = string | ChatContentPart[];
+
 export interface ChatMessage {
   role: ChatRole;
-  content: string;
+  content: ChatMessageContent;
 }
 
 export interface ChatRequest {

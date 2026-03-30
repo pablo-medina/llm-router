@@ -138,6 +138,23 @@ export function createOpenAiDriver(
   return new OpenAiDriver(config, options);
 }
 
+/** Collapse provider message content to plain text for the shared ChatMessage type. */
+function normalizeAssistantContent(content: unknown): string {
+  if (content === null || content === undefined) return "";
+  if (typeof content === "string") return content;
+  if (Array.isArray(content)) {
+    return content
+      .map((part) => {
+        if (part && typeof part === "object" && "text" in part) {
+          return String((part as { text?: unknown }).text ?? "");
+        }
+        return "";
+      })
+      .join("");
+  }
+  return String(content);
+}
+
 function mapOpenAiChatResponse(json: unknown): ChatResponse {
   const o = json as {
     id?: string;
@@ -157,7 +174,7 @@ function mapOpenAiChatResponse(json: unknown): ChatResponse {
   const choices =
     o.choices?.map((c, i) => {
       const roleRaw = c.message?.role;
-      const content = c.message?.content ?? "";
+      const content = normalizeAssistantContent(c.message?.content);
       const role: ChatRole =
         roleRaw === "system" || roleRaw === "user" || roleRaw === "assistant"
           ? roleRaw
@@ -166,7 +183,7 @@ function mapOpenAiChatResponse(json: unknown): ChatResponse {
         index: c.index ?? i,
         message: {
           role,
-          content: typeof content === "string" ? content : String(content),
+          content,
         },
         finishReason: c.finish_reason ?? null,
       };
