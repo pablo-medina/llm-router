@@ -2,26 +2,26 @@ import { LlmDriver } from "../llm-driver.js";
 import type { ChatRequest, ChatResponse, ChatRole } from "../types.js";
 
 export interface OpenAiDriverConfig {
-  /** Base URL del API, p. ej. https://api.openai.com/v1 */
+  /** API base URL, e.g. https://api.openai.com/v1 */
   baseUrl: string;
   apiKey: string;
-  /** Modelo por defecto si el request no trae `model`. */
+  /** Default model when the request omits `model`. */
   defaultModel?: string;
-  /** Cabecera opcional OpenAI-Organization */
+  /** Optional OpenAI-Organization header */
   organizationId?: string;
-  /** Cabeceras adicionales (p. ej. proveedores que piden claves extra). */
+  /** Extra headers (e.g. providers that require additional keys). */
   headers?: Record<string, string>;
-  /** Timeout en ms para la petición HTTP. */
+  /** Timeout in ms for the HTTP request. */
   timeoutMs?: number;
 }
 
-/** Normaliza baseUrl: sin slash final. */
+/** Normalize baseUrl: no trailing slash. */
 function normalizeBaseUrl(url: string): string {
   return url.replace(/\/+$/, "");
 }
 
 /**
- * Driver OpenAI: Chat Completions (`POST .../chat/completions`).
+ * OpenAI driver: Chat Completions (`POST .../chat/completions`).
  */
 export class OpenAiDriver extends LlmDriver {
   readonly id: string;
@@ -37,11 +37,38 @@ export class OpenAiDriver extends LlmDriver {
     this.timeoutMs = config.timeoutMs ?? 120_000;
   }
 
+  /**
+   * GET `/models` — lightweight and standard on OpenAI-compatible APIs.
+   */
+  override async healthCheck(): Promise<void> {
+    const url = `${this.base}/models`;
+    const timeoutMs = Math.min(this.timeoutMs, 15_000);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${this.config.apiKey}`,
+        },
+        signal: controller.signal,
+      });
+      const text = await res.text();
+      if (!res.ok) {
+        throw new Error(
+          `GET /models failed (${res.status}): ${text.slice(0, 400)}`,
+        );
+      }
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   override async chat(request: ChatRequest): Promise<ChatResponse> {
     const model = request.model ?? this.config.defaultModel;
     if (!model) {
       throw new Error(
-        "No hay modelo: define `model` en el request o `defaultModel` en la configuración del driver.",
+        "No model: set `model` on the request or `defaultModel` on the driver configuration.",
       );
     }
 
@@ -88,7 +115,7 @@ export class OpenAiDriver extends LlmDriver {
       json = text ? JSON.parse(text) : {};
     } catch {
       throw new Error(
-        `Respuesta no JSON del proveedor (${res.status}): ${text.slice(0, 500)}`,
+        `Non-JSON response from provider (${res.status}): ${text.slice(0, 500)}`,
       );
     }
 
@@ -97,7 +124,7 @@ export class OpenAiDriver extends LlmDriver {
         typeof json === "object" && json !== null && "error" in json
           ? JSON.stringify((json as { error: unknown }).error)
           : text.slice(0, 500);
-      throw new Error(`Chat completions falló (${res.status}): ${errMsg}`);
+      throw new Error(`Chat completions failed (${res.status}): ${errMsg}`);
     }
 
     return mapOpenAiChatResponse(json);

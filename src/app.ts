@@ -6,6 +6,7 @@ import { pinoHttp } from "pino-http";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import type { AgentRegistry } from "./agents/types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -21,8 +22,15 @@ function loadPackageVersion(): string {
 
 const version = loadPackageVersion();
 
-export function createApp(logger: pino.Logger) {
+export interface CreateAppOptions {
+  /** Agent registry (may be empty if there is no `ai.agents` in configuration). */
+  agentRegistry: AgentRegistry;
+}
+
+export function createApp(logger: pino.Logger, options: CreateAppOptions) {
   const app = express();
+
+  app.set("agentRegistry", options.agentRegistry);
 
   app.disable("x-powered-by");
 

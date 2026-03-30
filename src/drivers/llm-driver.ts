@@ -1,13 +1,18 @@
 import type { ChatRequest, ChatResponse } from "./types.js";
 
 /**
- * Contrato base para drivers LLM: cada implementación habla con un proveedor concreto.
+ * Base contract for LLM drivers: each implementation talks to a concrete provider.
  */
 export abstract class LlmDriver {
   abstract readonly id: string;
 
   /**
-   * Envía un chat y devuelve la respuesta agregada (no streaming).
+   * Sends a chat and returns the aggregated response (no streaming).
    */
   abstract chat(request: ChatRequest): Promise<ChatResponse>;
+
+  /**
+   * Verifies connectivity and credentials with the provider (e.g. at bootstrap).
+   */
+  abstract healthCheck(): Promise<void>;
 }

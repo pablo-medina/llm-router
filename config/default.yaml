@@ -1,0 +1,27 @@
+# Alternate path: LLM_ROUTER_CONFIG environment variable
+#
+# server.port — defaults to 9400 (you can also use the system PORT variable)
+server:
+  port: 9400
+
+# ai.drivers: LLM provider definitions
+# ai.agents: agents that reference a driver by name
+# LLM health checks only run at startup if ai.agents has at least one item.
+#
+# Each driver accepts either apiKey in plain text or envApiKey (environment variable name), not both.
+#
+# Example drivers and agents:
+#   drivers:
+#     - name: openai
+#       url: https://api.openai.com/v1
+#       envApiKey: OPENAI_API_KEY
+#       # apiKey: sk-...   # optional instead of envApiKey
+#       # defaultModel: gpt-4o-mini
+#   agents:
+#     - name: default
+#       description: General-purpose agent
+#       driver: openai
+
+ai:
+  drivers: []
+  agents: []

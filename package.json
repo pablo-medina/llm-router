@@ -19,7 +19,8 @@
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "pino": "^9.6.0",
-    "pino-http": "^10.4.0"
+    "pino-http": "^10.4.0",
+    "yaml": "^2.8.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

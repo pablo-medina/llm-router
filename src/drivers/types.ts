@@ -1,5 +1,5 @@
 /**
- * Tipos comunes para requests/responses de chat entre drivers y el router.
+ * Common types for chat requests/responses between drivers and the router.
  */
 
 export type ChatRole = "system" | "user" | "assistant";
@@ -11,11 +11,11 @@ export interface ChatMessage {
 
 export interface ChatRequest {
   messages: ChatMessage[];
-  /** Si no se indica, el driver puede usar un modelo por defecto de su configuración. */
+  /** When omitted, the driver may use a default model from its configuration. */
   model?: string;
   temperature?: number;
   maxTokens?: number;
-  /** Parámetros extra que el proveedor acepte (p. ej. top_p, stream en el futuro). */
+  /** Extra parameters the provider accepts (e.g. top_p, stream in the future). */
   extra?: Record<string, unknown>;
 }
 

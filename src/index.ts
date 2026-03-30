@@ -1,25 +1,32 @@
 import pino from "pino";
 import { createApp } from "./app.js";
-
-const port = Number(process.env.PORT ?? 9400);
+import { bootstrap } from "./bootstrap.js";
 
 const logger = pino({
   level: process.env.LOG_LEVEL ?? "info",
 });
 
-const app = createApp(logger);
+async function main() {
+  const { port, agents } = await bootstrap(logger);
+  const app = createApp(logger, { agentRegistry: agents });
 
-const server = app.listen(port, () => {
-  logger.info({ port }, "llm-router listening");
-});
-
-function shutdown(signal: string) {
-  logger.info({ signal }, "shutting down");
-  server.close(() => {
-    process.exit(0);
+  const server = app.listen(port, () => {
+    logger.info({ port }, "llm-router listening");
   });
-  setTimeout(() => process.exit(1), 10_000).unref();
+
+  function shutdown(signal: string) {
+    logger.info({ signal }, "shutting down");
+    server.close(() => {
+      process.exit(0);
+    });
+    setTimeout(() => process.exit(1), 10_000).unref();
+  }
+
+  process.on("SIGINT", () => shutdown("SIGINT"));
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
 }
 
-process.on("SIGINT", () => shutdown("SIGINT"));
-process.on("SIGTERM", () => shutdown("SIGTERM"));
+main().catch((err) => {
+  logger.error(err);
+  process.exit(1);
+});
