@@ -1,4 +1,4 @@
-import pino from "pino";
+import { pino } from "pino";
 import { createApp } from "./app.js";
 import { bootstrap } from "./bootstrap.js";
 

@@ -2,6 +2,10 @@
 
 `llm-router` exposes a small JSON API. All agent routes are mounted under **`/api`**.
 
+## Runtime
+
+Run the service with a Node.js version that satisfies **`engines.node`** in the repository root **`package.json`**. That field is the single source of truth for the minimum runtime (global `fetch` for upstream calls, native ESM, and compatibility with the pinned dependency set).
+
 - **Request bodies:** `Content-Type: application/json` (JSON object).
 - **JSON size limit:** 10 MB (large base64 images count toward this limit).
 

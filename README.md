@@ -8,7 +8,7 @@ A Node.js service that routes LLM traffic to configured providers (OpenAI-compat
 
 ## Requirements
 
-- **Node.js** ≥ 24.14.1 (see `package.json`).
+- **Node.js** **20.10.0** or newer. This is the minimum version the project is expected to build and run against: native `fetch` (used for provider calls), ESM (`"type": "module"`, `NodeNext` resolution), and the dependency stack all work on this line. The exact constraint is declared under `engines.node` in **`package.json`**—use that field as the source of truth for tooling and CI.
 
 ## Install and run
 

@@ -1,7 +1,7 @@
 import cors from "cors";
 import express from "express";
 import type { IncomingMessage } from "node:http";
-import pino from "pino";
+import type { Logger } from "pino";
 import { pinoHttp } from "pino-http";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -28,7 +28,7 @@ export interface CreateAppOptions {
   agentRegistry: AgentRegistry;
 }
 
-export function createApp(logger: pino.Logger, options: CreateAppOptions) {
+export function createApp(logger: Logger, options: CreateAppOptions) {
   const app = express();
 
   app.set("agentRegistry", options.agentRegistry);
