@@ -2,7 +2,7 @@ import type { AppConfig } from "../config/types.js";
 import { resolveDriverApiKey } from "../config/resolve-api-key.js";
 import { OpenAiDriver } from "../drivers/openai/openai-driver.js";
 import type { LlmDriver } from "../drivers/llm-driver.js";
-import { AgentRegistry, type Agent } from "./types.js";
+import { ProfileRegistry, type Profile } from "./types.js";
 
 function createDriverInstance(
   def: import("../config/types.js").AiDriverConfig,
@@ -27,11 +27,11 @@ function createDriverInstance(
 }
 
 /**
- * Validates uniqueness, resolves API keys, and builds the agent registry with drivers.
+ * Validates uniqueness, resolves API keys, and builds the profile registry with drivers.
  */
-export function buildAgentRegistry(config: AppConfig): AgentRegistry {
+export function buildProfileRegistry(config: AppConfig): ProfileRegistry {
   const driversYaml = config.ai?.drivers ?? [];
-  const agentsYaml = config.ai?.agents ?? [];
+  const profilesYaml = config.ai?.profiles ?? [];
 
   const driverByName = new Map<string, LlmDriver>();
   const seenDriverNames = new Set<string>();
@@ -45,30 +45,30 @@ export function buildAgentRegistry(config: AppConfig): AgentRegistry {
     driverByName.set(key, createDriverInstance(d));
   }
 
-  const seenAgentNames = new Set<string>();
-  const agents: Agent[] = [];
+  const seenProfileNames = new Set<string>();
+  const profiles: Profile[] = [];
 
-  for (const a of agentsYaml) {
-    const n = a.name.trim();
-    if (seenAgentNames.has(n)) {
-      throw new Error(`ai.agents: duplicate name "${a.name}"`);
+  for (const p of profilesYaml) {
+    const n = p.name.trim();
+    if (seenProfileNames.has(n)) {
+      throw new Error(`ai.profiles: duplicate name "${p.name}"`);
     }
-    seenAgentNames.add(n);
+    seenProfileNames.add(n);
 
-    const driverName = a.driver.trim().toLowerCase();
+    const driverName = p.driver.trim().toLowerCase();
     const driver = driverByName.get(driverName);
     if (!driver) {
       throw new Error(
-        `Agent "${a.name}": no driver named "${driverName}" exists in ai.drivers.`,
+        `Profile "${p.name}": no driver named "${driverName}" exists in ai.drivers.`,
       );
     }
 
-    agents.push({
+    profiles.push({
       name: n,
-      description: a.description,
+      description: p.description,
       driver,
     });
   }
 
-  return new AgentRegistry(agents);
+  return new ProfileRegistry(profiles);
 }

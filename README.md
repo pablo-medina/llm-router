@@ -1,6 +1,6 @@
 # llm-router
 
-A Node.js service that routes LLM traffic to configured providers (OpenAI-compatible APIs) per **agent**. Clients talk to a small HTTP API; API keys and provider URLs stay on the server.
+A Node.js service that routes LLM traffic to configured providers (OpenAI-compatible APIs) per **profile**. Clients talk to a small HTTP API; API keys and provider URLs stay on the server.
 
 ## Documentation
 
@@ -30,16 +30,16 @@ npm run dev
 - Override path: environment variable **`LLM_ROUTER_CONFIG`** pointing to another YAML file.
 - Listen port: **`server.port`** in YAML, or **`PORT`** in the environment (wins over YAML).
 
-See comments inside `config/default.yaml` for driver and agent fields.
+See comments inside `config/default.yaml` for driver and profile fields.
 
 ## Quick API smoke test
 
-With the server listening on port **9400** and agent **`default`** defined in config:
+With the server listening on port **9400** and profile **`default`** defined in config:
 
 ```bash
 curl -s http://127.0.0.1:9400/health
-curl -s http://127.0.0.1:9400/api/agents
-curl -s -X POST http://127.0.0.1:9400/api/agents/default/chat \
+curl -s http://127.0.0.1:9400/api/profiles
+curl -s -X POST http://127.0.0.1:9400/api/profiles/default/chat \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Say hi in one short sentence."}'
 ```

@@ -5,8 +5,8 @@ server:
   port: 9400
 
 # ai.drivers: LLM provider definitions
-# ai.agents: agents that reference a driver by name
-# LLM health checks only run at startup if ai.agents has at least one item.
+# ai.profiles: profiles that reference a driver by name
+# LLM health checks only run at startup if ai.profiles has at least one item.
 #
 # Each driver accepts either apiKey in plain text or envApiKey (environment variable name), not both.
 #
@@ -21,7 +21,7 @@ ai:
       url: http://127.0.0.1:1234/v1
       apiKey: lm-studio
       defaultModel: gemma-3-4b
-  agents:
+  profiles:
     - name: default
-      description: General-purpose agent
+      description: General-purpose profile
       driver: openai

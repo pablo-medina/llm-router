@@ -1,6 +1,6 @@
 # HTTP API reference
 
-`llm-router` exposes a small JSON API. All agent routes are mounted under **`/api`**.
+`llm-router` exposes a small JSON API. All profile routes are mounted under **`/api`**.
 
 ## Runtime
 
@@ -17,7 +17,7 @@ Responses **do not** include:
 - Driver base URLs or internal driver identifiers
 - The raw upstream provider payload (`raw` is stripped before responding)
 
-The **list agents** endpoint only returns each agent’s `name` and `description`. Chat responses return normalized assistant text, optional `usage` token counts, and provider `id` / `model` fields when present—never credentials.
+The **list profiles** endpoint only returns each profile’s `name` and `description`. Chat responses return normalized assistant text, optional `usage` token counts, and provider `id` / `model` fields when present—never credentials.
 
 ---
 
@@ -52,40 +52,40 @@ Minimal service metadata.
 
 ---
 
-## Agent API (`/api`)
+## Profile API (`/api`)
 
 Replace `BASE` with your server URL (default listen port from config: **9400**), e.g. `http://127.0.0.1:9400`.
 
-Replace `AGENT` with a configured agent name (e.g. `default` from `config/default.yaml`).
+Replace `PROFILE` with a configured profile name (e.g. `default` from `config/default.yaml`).
 
-### `GET /api/agents`
+### `GET /api/profiles`
 
-Returns all configured agents. Names must match the `:agentName` path parameter on chat routes.
+Returns all configured profiles. Names must match the `:profileName` path parameter on chat routes.
 
 **Response** `200` — body:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `agents` | `array` | Ordered list of agents. |
+| `profiles` | `array` | Ordered list of profiles. |
 
 Each element:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `name` | `string` | Unique agent name. |
+| `name` | `string` | Unique profile name. |
 | `description` | `string` | Human-readable description. |
 
 **Example**
 
 ```bash
-curl -s "${BASE}/api/agents"
+curl -s "${BASE}/api/profiles"
 ```
 
 ---
 
-### `POST /api/agents/:agentName/chat`
+### `POST /api/profiles/:profileName/chat`
 
-Runs a chat completion for the given agent. The router forwards the request to the provider configured for that agent (e.g. OpenAI-compatible API).
+Runs a chat completion for the given profile. The router forwards the request to the provider configured for that profile (e.g. OpenAI-compatible API).
 
 You must supply **either**:
 
@@ -109,13 +109,13 @@ Do **not** send both as conflicting sources of truth; if `messages` is present, 
 | Status | Body | When |
 |--------|------|------|
 | `400` | `{ "error": "..." }` | Invalid JSON, missing `prompt`/`messages`, or invalid message shape. |
-| `404` | `{ "error": "..." }` | Unknown `agentName`. |
+| `404` | `{ "error": "..." }` | Unknown `profileName`. |
 | `502` | `{ "error": "..." }` | Upstream provider error or network failure (message is sanitized—no secrets). |
 
 #### Simple prompt (curl)
 
 ```bash
-curl -s -X POST "${BASE}/api/agents/${AGENT}/chat" \
+curl -s -X POST "${BASE}/api/profiles/${PROFILE}/chat" \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Say hello in one short sentence."}'
 ```
@@ -123,7 +123,7 @@ curl -s -X POST "${BASE}/api/agents/${AGENT}/chat" \
 #### Messages with roles
 
 ```bash
-curl -s -X POST "${BASE}/api/agents/${AGENT}/chat" \
+curl -s -X POST "${BASE}/api/profiles/${PROFILE}/chat" \
   -H "Content-Type: application/json" \
   -d '{
     "messages": [
@@ -139,7 +139,7 @@ curl -s -X POST "${BASE}/api/agents/${AGENT}/chat" \
 Useful when your model supports vision. `content` may be a string or an array of [content parts](#content-parts).
 
 ```bash
-curl -s -X POST "${BASE}/api/agents/${AGENT}/chat" \
+curl -s -X POST "${BASE}/api/profiles/${PROFILE}/chat" \
   -H "Content-Type: application/json" \
   -d '{
     "messages": [
@@ -157,7 +157,7 @@ curl -s -X POST "${BASE}/api/agents/${AGENT}/chat" \
 Data URL (base64) example—keep payloads small or use a file (see [Large JSON and Windows](#large-json-and-windows)):
 
 ```bash
-curl -s -X POST "${BASE}/api/agents/${AGENT}/chat" \
+curl -s -X POST "${BASE}/api/profiles/${PROFILE}/chat" \
   -H "Content-Type: application/json" \
   -d '{
     "messages": [
@@ -174,7 +174,7 @@ curl -s -X POST "${BASE}/api/agents/${AGENT}/chat" \
 
 ---
 
-### `POST /api/agents/:agentName/analyze-images`
+### `POST /api/profiles/:profileName/analyze-images`
 
 Convenience endpoint for vision: builds a single **user** message from a text prompt plus one or more images. Equivalent to calling **`/chat`** with a multimodal `messages` array.
 
@@ -200,7 +200,7 @@ Each **`images[]`** element must include **either**:
 **Example (base64)**
 
 ```bash
-curl -s -X POST "${BASE}/api/agents/${AGENT}/analyze-images" \
+curl -s -X POST "${BASE}/api/profiles/${PROFILE}/analyze-images" \
   -H "Content-Type: application/json" \
   -d "{\"prompt\":\"What is in this image?\",\"images\":[{\"base64\":\"YOUR_BASE64\",\"mimeType\":\"image/png\"}]}"
 ```
@@ -208,7 +208,7 @@ curl -s -X POST "${BASE}/api/agents/${AGENT}/analyze-images" \
 **Example (image URL)**
 
 ```bash
-curl -s -X POST "${BASE}/api/agents/${AGENT}/analyze-images" \
+curl -s -X POST "${BASE}/api/profiles/${PROFILE}/analyze-images" \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Describe the scene.","images":[{"url":"https://example.com/photo.jpg"}]}'
 ```
@@ -293,7 +293,7 @@ Long one-line JSON is awkward in **cmd.exe** because of escaping rules. Prefer a
 ```
 
 ```bash
-curl -s -X POST "${BASE}/api/agents/${AGENT}/chat" \
+curl -s -X POST "${BASE}/api/profiles/${PROFILE}/chat" \
   -H "Content-Type: application/json" \
   --data-binary @payload.json
 ```
@@ -310,13 +310,13 @@ curl.exe -s -X POST ...
 
 ```bash
 export BASE=http://127.0.0.1:9400
-export AGENT=default
+export PROFILE=default
 
 curl -s "${BASE}/health"
-curl -s "${BASE}/api/agents"
-curl -s -X POST "${BASE}/api/agents/${AGENT}/chat" \
+curl -s "${BASE}/api/profiles"
+curl -s -X POST "${BASE}/api/profiles/${PROFILE}/chat" \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Reply with the word pong."}'
 ```
 
-Ensure your provider (e.g. LM Studio) is running and that `config/default.yaml` defines at least one agent if you expect **`/api/agents`** to be non-empty and chat to succeed.
+Ensure your provider (e.g. LM Studio) is running and that `config/default.yaml` defines at least one profile if you expect **`/api/profiles`** to be non-empty and chat to succeed.

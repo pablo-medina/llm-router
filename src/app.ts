@@ -6,8 +6,8 @@ import { pinoHttp } from "pino-http";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { AgentRegistry } from "./agents/types.js";
-import { createAgentRoutes } from "./routes/agent-routes.js";
+import type { ProfileRegistry } from "./profiles/types.js";
+import { createProfileRoutes } from "./routes/profile-routes.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -24,14 +24,14 @@ function loadPackageVersion(): string {
 const version = loadPackageVersion();
 
 export interface CreateAppOptions {
-  /** Agent registry (may be empty if there is no `ai.agents` in configuration). */
-  agentRegistry: AgentRegistry;
+  /** Profile registry (may be empty if there is no `ai.profiles` in configuration). */
+  profileRegistry: ProfileRegistry;
 }
 
 export function createApp(logger: Logger, options: CreateAppOptions) {
   const app = express();
 
-  app.set("agentRegistry", options.agentRegistry);
+  app.set("profileRegistry", options.profileRegistry);
 
   app.disable("x-powered-by");
 
@@ -67,7 +67,7 @@ export function createApp(logger: Logger, options: CreateAppOptions) {
     });
   });
 
-  app.use("/api", createAgentRoutes(options.agentRegistry));
+  app.use("/api", createProfileRoutes(options.profileRegistry));
 
   return app;
 }

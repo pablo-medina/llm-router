@@ -37,14 +37,14 @@ function parseAiDriver(raw: unknown, idx: number): import("./types.js").AiDriver
   };
 }
 
-function parseAiAgent(raw: unknown, idx: number): import("./types.js").AiAgentConfig {
+function parseAiProfile(raw: unknown, idx: number): import("./types.js").AiProfileConfig {
   if (!isRecord(raw)) {
-    throw new Error(`ai.agents[${idx}]: expected an object`);
+    throw new Error(`ai.profiles[${idx}]: expected an object`);
   }
   return {
-    name: asString(raw.name, `ai.agents[${idx}].name`),
-    description: asString(raw.description, `ai.agents[${idx}].description`),
-    driver: asString(raw.driver, `ai.agents[${idx}].driver`),
+    name: asString(raw.name, `ai.profiles[${idx}].name`),
+    description: asString(raw.description, `ai.profiles[${idx}].description`),
+    driver: asString(raw.driver, `ai.profiles[${idx}].driver`),
   };
 }
 
@@ -53,24 +53,24 @@ function parseAi(raw: unknown): AiConfig {
     throw new Error("ai: expected an object");
   }
   const driversRaw = raw.drivers;
-  const agentsRaw = raw.agents;
+  const profilesRaw = raw.profiles;
 
   if (driversRaw !== undefined && !Array.isArray(driversRaw)) {
     throw new Error("ai.drivers must be an array");
   }
-  if (agentsRaw !== undefined && !Array.isArray(agentsRaw)) {
-    throw new Error("ai.agents must be an array");
+  if (profilesRaw !== undefined && !Array.isArray(profilesRaw)) {
+    throw new Error("ai.profiles must be an array");
   }
 
   const drivers = Array.isArray(driversRaw)
     ? driversRaw.map((d, i) => parseAiDriver(d, i))
     : [];
-  const agents =
-    agentsRaw === undefined
+  const profiles =
+    profilesRaw === undefined
       ? undefined
-      : agentsRaw.map((a, i) => parseAiAgent(a, i));
+      : profilesRaw.map((p, i) => parseAiProfile(p, i));
 
-  return { drivers, agents };
+  return { drivers, profiles };
 }
 
 function parseAppConfig(doc: unknown): AppConfig {
@@ -127,8 +127,8 @@ export function loadAppConfig(): AppConfig {
   return parseAppConfig(doc);
 }
 
-/** Only when the `ai.agents` key exists in YAML and has at least one agent. */
-export function shouldRunAgentLlmHealthChecks(config: AppConfig): boolean {
-  const agents = config.ai?.agents;
-  return agents !== undefined && agents.length > 0;
+/** Only when the `ai.profiles` key exists in YAML and has at least one profile. */
+export function shouldRunProfileLlmHealthChecks(config: AppConfig): boolean {
+  const profiles = config.ai?.profiles;
+  return profiles !== undefined && profiles.length > 0;
 }

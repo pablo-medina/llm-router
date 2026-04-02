@@ -1,16 +1,16 @@
 import type { Logger } from "pino";
 import {
   loadAppConfig,
-  shouldRunAgentLlmHealthChecks,
+  shouldRunProfileLlmHealthChecks,
 } from "./config/load-config.js";
-import { buildAgentRegistry } from "./agents/build-registry.js";
-import { runAgentLlmHealthChecks } from "./agents/health.js";
+import { buildProfileRegistry } from "./profiles/build-registry.js";
+import { runProfileLlmHealthChecks } from "./profiles/health.js";
 import type { AppConfig } from "./config/types.js";
-import type { AgentRegistry } from "./agents/types.js";
+import type { ProfileRegistry } from "./profiles/types.js";
 
 export interface BootstrapResult {
   config: AppConfig;
-  agents: AgentRegistry;
+  profiles: ProfileRegistry;
   port: number;
 }
 
@@ -28,12 +28,12 @@ function resolveListenPort(config: AppConfig): number {
 
 export async function bootstrap(log: Logger): Promise<BootstrapResult> {
   const config = loadAppConfig();
-  let agents = buildAgentRegistry(config);
+  let profiles = buildProfileRegistry(config);
 
-  if (shouldRunAgentLlmHealthChecks(config)) {
-    agents = await runAgentLlmHealthChecks(agents, log);
+  if (shouldRunProfileLlmHealthChecks(config)) {
+    profiles = await runProfileLlmHealthChecks(profiles, log);
   }
 
   const port = resolveListenPort(config);
-  return { config, agents, port };
+  return { config, profiles, port };
 }

@@ -13,7 +13,7 @@ export interface AiDriverConfig {
   defaultModel?: string;
 }
 
-export interface AiAgentConfig {
+export interface AiProfileConfig {
   name: string;
   description: string;
   /** Must match `ai.drivers[].name`. */
@@ -23,7 +23,7 @@ export interface AiAgentConfig {
 export interface AiConfig {
   drivers: AiDriverConfig[];
   /** If the key is missing in YAML, LLM health checks are not run at bootstrap. */
-  agents?: AiAgentConfig[];
+  profiles?: AiProfileConfig[];
 }
 
 export interface AppConfig {

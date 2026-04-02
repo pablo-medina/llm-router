@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from "express";
-import type { AgentRegistry } from "../agents/types.js";
+import type { ProfileRegistry } from "../profiles/types.js";
 import type {
   ChatContentPart,
   ChatMessage,
@@ -117,30 +117,30 @@ function readJsonBody(req: Request): unknown {
   return req.body;
 }
 
-export function createAgentRoutes(registry: AgentRegistry): Router {
+export function createProfileRoutes(registry: ProfileRegistry): Router {
   const router = Router();
 
-  router.get("/agents", (_req: Request, res: Response) => {
+  router.get("/profiles", (_req: Request, res: Response) => {
     res.json({
-      agents: registry.all().map((a) => ({
-        name: a.name,
-        description: a.description,
+      profiles: registry.all().map((p) => ({
+        name: p.name,
+        description: p.description,
       })),
     });
   });
 
   router.post(
-    "/agents/:agentName/chat",
+    "/profiles/:profileName/chat",
     async (req: Request, res: Response) => {
-      const agentName = req.params.agentName?.trim();
-      if (!agentName) {
-        badRequest(res, "Missing agent name.");
+      const profileName = req.params.profileName?.trim();
+      if (!profileName) {
+        badRequest(res, "Missing profile name.");
         return;
       }
 
-      const agent = registry.get(agentName);
-      if (!agent) {
-        notFound(res, `Unknown agent: "${agentName}".`);
+      const profile = registry.get(profileName);
+      if (!profile) {
+        notFound(res, `Unknown profile: "${profileName}".`);
         return;
       }
 
@@ -190,7 +190,7 @@ export function createAgentRoutes(registry: AgentRegistry): Router {
       };
 
       try {
-        const out = await agent.driver.chat(chatRequest);
+        const out = await profile.driver.chat(chatRequest);
         res.status(200).json(toPublicChatResponse(out));
       } catch (e) {
         const msg =
@@ -201,17 +201,17 @@ export function createAgentRoutes(registry: AgentRegistry): Router {
   );
 
   router.post(
-    "/agents/:agentName/analyze-images",
+    "/profiles/:profileName/analyze-images",
     async (req: Request, res: Response) => {
-      const agentName = req.params.agentName?.trim();
-      if (!agentName) {
-        badRequest(res, "Missing agent name.");
+      const profileName = req.params.profileName?.trim();
+      if (!profileName) {
+        badRequest(res, "Missing profile name.");
         return;
       }
 
-      const agent = registry.get(agentName);
-      if (!agent) {
-        notFound(res, `Unknown agent: "${agentName}".`);
+      const profile = registry.get(profileName);
+      if (!profile) {
+        notFound(res, `Unknown profile: "${profileName}".`);
         return;
       }
 
@@ -286,7 +286,7 @@ export function createAgentRoutes(registry: AgentRegistry): Router {
       }
 
       try {
-        const out = await agent.driver.chat(chatRequest);
+        const out = await profile.driver.chat(chatRequest);
         res.status(200).json(toPublicChatResponse(out));
       } catch (e) {
         const msg =

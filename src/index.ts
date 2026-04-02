@@ -7,8 +7,8 @@ const logger = pino({
 });
 
 async function main() {
-  const { port, agents } = await bootstrap(logger);
-  const app = createApp(logger, { agentRegistry: agents });
+  const { port, profiles } = await bootstrap(logger);
+  const app = createApp(logger, { profileRegistry: profiles });
 
   const server = app.listen(port, () => {
     logger.info({ port }, "llm-router listening");
