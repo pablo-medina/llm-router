@@ -28,10 +28,10 @@ function resolveListenPort(config: AppConfig): number {
 
 export async function bootstrap(log: Logger): Promise<BootstrapResult> {
   const config = loadAppConfig();
-  const agents = buildAgentRegistry(config);
+  let agents = buildAgentRegistry(config);
 
   if (shouldRunAgentLlmHealthChecks(config)) {
-    await runAgentLlmHealthChecks(agents, log);
+    agents = await runAgentLlmHealthChecks(agents, log);
   }
 
   const port = resolveListenPort(config);
